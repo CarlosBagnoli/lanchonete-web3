@@ -2,24 +2,29 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Produto;
+use App\Models\Categoria;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        
+        $this->call(CategoriaSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        
+        if (Categoria::count() > 0) {
+            Produto::factory()->count(30)->create();
+        }
+        
+        // Opcional: Criar um usuário de teste padrão
+        // \App\Models\User::factory()->create([
+        //     'name' => 'Admin Teste',
+        //     'email' => 'admin@teste.com',
+        // ]);
     }
 }

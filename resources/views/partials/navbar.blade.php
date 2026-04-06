@@ -13,7 +13,8 @@ toggle="collapse" data-bs-target="#navbarConteudo">
 <li class="nav-item"><a href="#pedidos">Pedidos</a></li>
 <li class="nav-item"><a href="#contato">Contato</a></li>
 <li><a href="{{ route('sobre')}}">Sobre</a></li>
-
+<li class="nav-item"><a href="{{ route('categorias.index') }}">Categorias</a></li>
+<li class="nav-item"><a href="{{ route('produtos.index') }}">Produtos</a></li>
 </ul>
 </div>
 </div>
