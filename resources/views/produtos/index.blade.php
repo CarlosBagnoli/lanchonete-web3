@@ -12,42 +12,36 @@
         <table class="table table-hover align-middle mb-0">
             <thead class="table-dark">
                 <tr>
-                    <th>Imagem</th>
                     <th>Nome</th>
-                    <th>Categoria</th>
                     <th>Preço</th>
-                    <th>Estoque</th>
-                    <th class="text-center">Ações</th>
+                    <th>Categoria</th>
+                    <th>Imagem</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse($produtos as $p)
+                @foreach($produtos as $produto)
                 <tr>
-                    <td style="width:80px;">
-                        @if($p->imagem)
-                            <img src="{{ asset('storage/' . $p->imagem) }}" alt="{{ $p->nome }}" class="img-fluid rounded" style="max-width:72px; height:auto;">
+                    <td>{{ $produto->nome }}</td>
+                    <td>R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
+                    <td>{{ $produto->categoria->nome }}</td>
+                    <td>
+                        @if($produto->imagem)
+                            <img src="{{ Storage::url($produto->imagem) }}" alt="Imagem de {{ $produto->nome }}" width="100">
                         @else
-                            <div class="text-muted small">—</div>
+                            Sem imagem
                         @endif
                     </td>
-                    <td><strong>{{ $p->nome }}</strong></td>
-                    <td><span class="badge bg-info text-dark">{{ $p->categoria->nome }}</span></td>
-                    <td>R$ {{ number_format($p->preco, 2, ',', '.') }}</td>
-                    <td>{{ $p->estoque }} unidades</td>
-                    <td class="text-center">
-                        <a href="{{ route('produtos.edit', $p->id) }}" class="btn btn-sm btn-outline-warning">Editar</a>
-                        
-                        <form action="{{ route('produtos.destroy', $p->id) }}" method="POST" class="d-inline">
-                            @csrf @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir produto?')">Excluir</button>
+                    <td>
+                        <a href="{{ route('produtos.edit', $produto) }}" class="btn btn-sm btn-primary">Editar</a>
+                        <form action="{{ route('produtos.destroy', $produto) }}" method="POST" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Excluir</button>
                         </form>
                     </td>
                 </tr>
-                @empty
-                <tr>
-                    <td colspan="5" class="text-center py-4">Nenhum produto cadastrado.</td>
-                </tr>
-                @endforelse
+                @endforeach
             </tbody>
         </table>
     </div>
