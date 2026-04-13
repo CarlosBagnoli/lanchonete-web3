@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Produto;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProdutoController extends Controller
 {
@@ -32,7 +33,13 @@ class ProdutoController extends Controller
             'preco'        => 'required|numeric|min:0',
             'descricao'    => 'nullable|max:500',
             'estoque'      => 'required|integer|min:0',
+            'imagem'       => 'nullable|image|max:2048',
         ]);
+
+        // tratar upload de imagem
+        if ($request->hasFile('imagem')) {
+            $dados['imagem'] = $request->file('imagem')->store('produtos', 'public');
+        }
 
         Produto::create($dados);
 
@@ -56,7 +63,17 @@ class ProdutoController extends Controller
             'preco'        => 'required|numeric|min:0',
             'descricao'    => 'nullable|max:500',
             'estoque'      => 'required|integer|min:0',
+            'imagem'       => 'nullable|image|max:2048',
         ]);
+
+        // tratar upload de nova imagem: remover antiga
+        if ($request->hasFile('imagem')) {
+            // remover imagem antiga se existir
+            if ($produto->imagem) {
+                Storage::disk('public')->delete($produto->imagem);
+            }
+            $dados['imagem'] = $request->file('imagem')->store('produtos', 'public');
+        }
 
         $produto->update($dados);
 
@@ -67,6 +84,12 @@ class ProdutoController extends Controller
     // Deletar do banco (Destroy)
     public function destroy(Produto $produto)
     {
+
+        // remover imagem associada
+        if ($produto->imagem) {
+            Storage::disk('public')->delete($produto->imagem);
+        }
+
         $produto->delete();
 
         return redirect()->route('produtos.index')

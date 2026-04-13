@@ -12,6 +12,7 @@
         <table class="table table-hover align-middle mb-0">
             <thead class="table-dark">
                 <tr>
+                    <th>Imagem</th>
                     <th>Nome</th>
                     <th>Categoria</th>
                     <th>Preço</th>
@@ -22,6 +23,13 @@
             <tbody>
                 @forelse($produtos as $p)
                 <tr>
+                    <td style="width:80px;">
+                        @if($p->imagem)
+                            <img src="{{ asset('storage/' . $p->imagem) }}" alt="{{ $p->nome }}" class="img-fluid rounded" style="max-width:72px; height:auto;">
+                        @else
+                            <div class="text-muted small">—</div>
+                        @endif
+                    </td>
                     <td><strong>{{ $p->nome }}</strong></td>
                     <td><span class="badge bg-info text-dark">{{ $p->categoria->nome }}</span></td>
                     <td>R$ {{ number_format($p->preco, 2, ',', '.') }}</td>

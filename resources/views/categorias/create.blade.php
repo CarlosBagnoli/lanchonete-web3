@@ -1,5 +1,5 @@
 
-
+@include('partials.alerts')
 @extends('layouts.app')
 @section('title', 'Nova Categoria')
 @section('content')

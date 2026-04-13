@@ -1,5 +1,6 @@
 @php
     $isEdit = isset($categoria);
+    @include('partials.alerts');
 @endphp
 
 <div class="mb-3">

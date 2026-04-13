@@ -1,12 +1,15 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Models\Categoria;
-use Illuminate\Http\Request;
+use App\Http\Requests\CategoriaRequest;
+
 class CategoriaController extends Controller
 {
     public function index()
     {
-        $categorias = Categoria::orderBy('nome')->get(); // Paginação entra no Cap. 4
+        $categorias = Categoria::orderBy('nome')->get();
         return view('categorias.index', compact('categorias'));
     }
 
@@ -15,15 +18,9 @@ class CategoriaController extends Controller
         return view('categorias.create');
     }
 
-    public function store(Request $request)
+    public function store(CategoriaRequest $request)
     {
-        // Validação simples por enquanto (Form Request no Cap. 3)
-        $dados = $request->validate([
-            'nome' => 'required|string|max:100|unique:categorias,nome',
-            'descricao' => 'nullable|string|max:500',
-            'ativa' => 'nullable|boolean',
-        ]);
-
+        $dados = $request->validated();
         $dados['ativa'] = $request->boolean('ativa');
 
         Categoria::create($dados);
@@ -37,14 +34,9 @@ class CategoriaController extends Controller
         return view('categorias.edit', compact('categoria'));
     }
 
-    public function update(Request $request, Categoria $categoria)
+    public function update(CategoriaRequest $request, Categoria $categoria)
     {
-        $dados = $request->validate([
-            'nome' => 'required|string|max:100|unique:categorias,nome,' . $categoria->id,
-            'descricao' => 'nullable|string|max:500',
-            'ativa' => 'nullable|boolean',
-        ]);
-
+        $dados = $request->validated();
         $dados['ativa'] = $request->boolean('ativa');
 
         $categoria->update($dados);

@@ -1,27 +1,21 @@
-{{-- Mensagem de Sucesso --}}
-@if(session('success'))
+{{-- resources/views/partials/alerts.blade.php --}}
+
+@if (session('sucesso'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {{ session('sucesso') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
     </div>
 @endif
 
-{{-- Mensagem de Erro --}}
-@if(session('error'))
+@if (session('erro'))
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {{ session('erro') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
     </div>
 @endif
 
-{{-- Lista de Erros de Validação (Opcional, mas útil) --}}
-@if($errors->any())
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <ul class="mb-0">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+@if ($errors->any())
+    <div class="alert alert-warning" role="alert">
+        <strong>Atenção:</strong> verifique os campos do formulário.
     </div>
 @endif
