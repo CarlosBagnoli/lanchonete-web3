@@ -7,11 +7,20 @@ use App\Http\Requests\CategoriaRequest;
 
 class CategoriaController extends Controller
 {
-    public function index()
-    {
-        $categorias = Categoria::orderBy('nome')->get();
-        return view('categorias.index', compact('categorias'));
-    }
+   public function index()
+{
+    $q = request('q');
+
+    $categorias = Categoria::query()
+        ->when($q, function ($query) use ($q) {
+            $query->where('nome', 'like', "%{$q}%");
+        })
+        ->orderBy('nome')
+        ->paginate(10)
+        ->withQueryString();
+
+    return view('categorias.index', compact('categorias', 'q'));
+}
 
     public function create()
     {

@@ -34,10 +34,11 @@
                     </td>
                     <td>
                         <a href="{{ route('produtos.edit', $produto) }}" class="btn btn-sm btn-primary">Editar</a>
-                        <form action="{{ route('produtos.destroy', $produto) }}" method="POST" style="display:inline;">
+                        <form method="POST" action="{{ route('produtos.destroy', $produto) }}" class="d-inline"
+                              onsubmit="return confirm('Tem certeza que deseja excluir?')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza?')">Excluir</button>
+                            <button class="btn btn-sm btn-outline-danger">Excluir</button>
                         </form>
                     </td>
                 </tr>
