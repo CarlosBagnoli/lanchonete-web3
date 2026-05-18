@@ -10,11 +10,29 @@ use Illuminate\Support\Facades\Storage;
 class ProdutoController extends Controller
 {
     // Listar todos os produtos (Index)
-    public function index()
+    public function index(Request $request)
     {
         // Usamos o 'with' para carregar a categoria e evitar o problema de N+1 consultas
-        $produtos = Produto::with('categoria')->orderBy('nome')->paginate(10);
-        return view('produtos.index', compact('produtos'));
+        $query = Produto::with('categoria');
+        
+        // Filtrar por categoria se fornecida
+        if ($request->filled('categoria_id')) {
+            $query->where('categoria_id', $request->categoria_id);
+        }
+        
+        // Validar e aplicar ordenação
+        $sortAllowed = ['nome', 'preco', 'categoria_id', 'estoque'];
+        $dirAllowed = ['asc', 'desc'];
+        
+        $sort = in_array($request->query('sort'), $sortAllowed) ? $request->query('sort') : 'nome';
+        $dir = in_array($request->query('dir'), $dirAllowed) ? $request->query('dir') : 'asc';
+        
+        $query->orderBy($sort, $dir);
+        
+        $produtos = $query->paginate(10)->withQueryString();
+        $categorias = Categoria::where('ativa', true)->get();
+        
+        return view('produtos.index', compact('produtos', 'categorias', 'sort', 'dir'));
     }
 
     // Mostrar formulário de criação (Create)

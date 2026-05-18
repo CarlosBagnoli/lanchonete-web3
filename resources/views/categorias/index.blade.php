@@ -6,19 +6,32 @@
 
     @include('partials.alerts')
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-    <h2 class="mb-0">Categorias</h2>
+    <div class="row align-items-center g-3 mb-3">
+        <div class="col-auto">
+            <h2 class="mb-0">Categorias</h2>
+        </div>
 
-    <form method="GET" action="{{ route('categorias.index') }}" class="d-flex gap-2">
-        <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Buscar por nome...">
-        <button class="btn btn-outline-secondary" type="submit">Buscar</button>
-        <a class="btn btn-outline-secondary" href="{{ route('categorias.index') }}">Limpar</a>
-    </form>
+        <div class="col-md">
+            <form method="GET" action="{{ route('categorias.index') }}" class="row g-2 align-items-center">
+                <div class="col-sm">
+                    <input type="text" name="q" value="{{ request('q') }}" class="form-control" placeholder="Buscar por nome...">
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-outline-secondary w-100" type="submit">Buscar</button>
+                </div>
+                <div class="col-auto">
+                    <a class="btn btn-outline-secondary w-100" href="{{ route('categorias.index') }}">Limpar</a>
+                </div>
+            </form>
+        </div>
 
-    <a class="btn btn-primary" href="{{ route('categorias.create') }}">Nova Categoria</a>
-</div>
+        <div class="col-auto">
+            <a class="btn btn-primary" href="{{ route('categorias.create') }}">Nova Categoria</a>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
-        <div class="card-body p-0">
+        <div class="table-responsive">
             <table class="table table-striped table-hover mb-0">
                 <thead class="table-light">
                     <tr>

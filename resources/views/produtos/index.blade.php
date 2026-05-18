@@ -8,13 +8,56 @@
         <a href="{{ route('produtos.create') }}" class="btn btn-success">Novo Produto</a>
     </div>
 
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="GET" action="{{ route('produtos.index') }}" class="row g-2 align-items-center">
+                <div class="col-md">
+                    <select name="categoria_id" class="form-select">
+                        <option value="">Todas as Categorias</option>
+                        @foreach($categorias as $categoria)
+                            <option value="{{ $categoria->id }}" {{ request('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                {{ $categoria->nome }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-auto d-flex gap-2">
+                    <button type="submit" class="btn btn-outline-secondary">Filtrar</button>
+                    <a href="{{ route('produtos.index') }}" class="btn btn-outline-secondary">Limpar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
-        <table class="table table-hover align-middle mb-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
             <thead class="table-dark">
                 <tr>
-                    <th>Nome</th>
-                    <th>Preço</th>
-                    <th>Categoria</th>
+                    <th>
+                        <a href="{{ route('produtos.index', array_merge(request()->query(), ['sort' => 'nome', 'dir' => $sort === 'nome' && $dir === 'asc' ? 'desc' : 'asc'])) }}" class="text-white text-decoration-none">
+                            Nome
+                            @if($sort === 'nome')
+                                <i class="bi {{ $dir === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                            @endif
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ route('produtos.index', array_merge(request()->query(), ['sort' => 'preco', 'dir' => $sort === 'preco' && $dir === 'asc' ? 'desc' : 'asc'])) }}" class="text-white text-decoration-none">
+                            Preço
+                            @if($sort === 'preco')
+                                <i class="bi {{ $dir === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                            @endif
+                        </a>
+                    </th>
+                    <th>
+                        <a href="{{ route('produtos.index', array_merge(request()->query(), ['sort' => 'categoria_id', 'dir' => $sort === 'categoria_id' && $dir === 'asc' ? 'desc' : 'asc'])) }}" class="text-white text-decoration-none">
+                            Categoria
+                            @if($sort === 'categoria_id')
+                                <i class="bi {{ $dir === 'asc' ? 'bi-arrow-up' : 'bi-arrow-down' }}"></i>
+                            @endif
+                        </a>
+                    </th>
                     <th>Imagem</th>
                     <th>Ações</th>
                 </tr>
