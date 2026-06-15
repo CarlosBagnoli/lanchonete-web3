@@ -2,13 +2,12 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-
-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>@yield('title', config('app.name'))</title>
-{{-- CSS via CDN (ex.: Bootstrap 5) para simplificar neste
-capítulo --}}
-https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min
-.css
+<!-- Bootstrap CSS via CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="" crossorigin="anonymous">
+<!-- Site custom styles -->
+<link href="/css/site.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 @include('partials.navbar')
@@ -17,7 +16,7 @@ https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min
 </main>
 @include('partials.footer')
 {{-- JS opcional para componentes do Bootstrap --}}
-https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bund
-le.min.js</script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="" crossorigin="anonymous"></script>
 </body>
 </html>

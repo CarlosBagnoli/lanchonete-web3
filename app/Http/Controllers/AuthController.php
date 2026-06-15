@@ -65,4 +65,25 @@ class AuthController extends Controller
 
         return redirect()->route('login.form');
     }
+
+    public function showAccount()
+    {
+        return view('auth.minha_conta');
+    }
+
+    public function updateAccount(Request $request)
+    {
+        $user = $request->user();
+
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+        ]);
+
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->save();
+
+        return redirect()->route('minha-conta')->with('success', 'Dados atualizados com sucesso.');
+    }
 }

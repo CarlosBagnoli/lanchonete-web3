@@ -1,0 +1,70 @@
+/* Estilos básicos e centralizados para o projeto */
+:root{
+    --max-width: 900px;
+    --accent: #0d6efd;
+    --muted: #6c757d;
+}
+
+body{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    color: #222;
+}
+
+/* Centraliza o conteúdo e limita largura */
+main.container{
+    max-width: var(--max-width);
+    margin-left: auto;
+    margin-right: auto;
+    background: #fff;
+    padding: 1.75rem;
+    border-radius: .5rem;
+    box-shadow: 0 6px 18px rgba(20,20,30,0.06);
+}
+
+/* Cabeçalho das páginas */
+h1{
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+/* Formulários mais compactos e centralizados */
+.form-group{ 
+    margin-bottom: .75rem;
+}
+.form-control{
+    border-radius: .375rem;
+}
+
+form{
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-primary{
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* Mensagens */
+.alert{
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Navbar simples e centralizada */
+.navbar{
+    background: linear-gradient(180deg, #ffffff, #f8f9fa);
+}
+.navbar .container{
+    max-width: var(--max-width);
+}
+
+/* Rodapé discreto */
+footer{
+    text-align: center;
+    padding: 1rem 0;
+    color: var(--muted);
+}
