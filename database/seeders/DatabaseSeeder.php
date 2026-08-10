@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Produto;
 use App\Models\Categoria;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,10 +23,11 @@ class DatabaseSeeder extends Seeder
             Produto::factory()->count(30)->create();
         }
         
-        // Opcional: Criar um usuário de teste padrão
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Admin Teste',
-        //     'email' => 'admin@teste.com',
-        // ]);
+        User::create([
+            'name' => 'Admin',
+            'email' => 'admin@teste.com',
+            'password' => Hash::make('12345678'),
+            'role' => 'admin',
+        ]);
     }
 }

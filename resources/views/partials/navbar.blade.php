@@ -11,6 +11,7 @@
     @endif
 
     <li class="nav-item"><a class="nav-link" href="{{ route('produtos.index') }}">Produtos</a></li>
+    <li class="nav-item"><a class="nav-link" href="{{ route('pedidos.index') }}">Pedidos</a></li>
     <li class="nav-item">{{ auth()->user()->name }} ({{ auth()->user()->role }})</li>
     <li class="nav-item">
         <form action="{{ route('logout') }}" method="POST" class="d-inline">

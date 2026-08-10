@@ -7,12 +7,13 @@ use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\ItemPedidoController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sobre', [SobreController::class, 'index'])->name('sobre');
 Route::get('/relatorios/categorias.csv', [CategoriaController::class, 'exportCsv'])->name('relatorios.categorias.csv');
 Route::get('/contato', [ContatoController::class, 'create'])->name('contato.create');
-Route::resource('pedidos', \App\Http\Controllers\PedidoController::class);
 Route ::resource('produtos', ProdutoController::class);
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register.form')->middleware('guest');
 Route::post('/register', [AuthController::class, 'register'])->name('register')->middleware('guest');
@@ -25,6 +26,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 Route::middleware(['auth'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::resource('produtos', ProdutoController::class);
+    Route::resource('pedidos', PedidoController::class);
+
+    // rotas para itens de um pedido
+    Route::post('pedidos/{pedido}/itens', [ItemPedidoController::class, 'store'])->name('pedidos.itens.store');
+    Route::delete('pedidos/{pedido}/itens/{itemPedido}', [ItemPedidoController::class, 'destroy'])->name('pedidos.itens.destroy');
+
     Route::get('/minha-conta', [AuthController::class, 'showAccount'])->name('minha-conta');
     Route::post('/minha-conta', [AuthController::class, 'updateAccount'])->name('minha-conta.update');
 });
