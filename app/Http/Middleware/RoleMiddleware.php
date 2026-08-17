@@ -19,10 +19,23 @@ class RoleMiddleware
     {
         $user = $request->user();
 
-        if (! $user || ($user->role ?? null) !== $role) {
+        if (! $user) {
+            abort(403);
+        }
+
+        // Support multiple roles passed as 'role1|role2' or 'role1,role2'
+        $allowed = preg_split('/[|,]/', $role);
+
+        // Always allow true admins (role 'admin')
+        if ($user->role === 'admin') {
+            return $next($request);
+        }
+
+        if (! in_array($user->role, $allowed, true)) {
             abort(403);
         }
 
         return $next($request);
     }
 }
+

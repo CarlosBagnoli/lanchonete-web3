@@ -6,7 +6,7 @@
 <h1 class="display-5 fw-bold">{{ $titulo }}</h1>
 <p class="col-md-8 fs-5">
 próximas aulas,
-Este é o início do sistema da Lanchonete. Nas
+Este é o início do sistema da Lanchonete. Nós
 vamos construir o catálogo (categorias e produtos),
 pedidos e relatórios.
 </p>

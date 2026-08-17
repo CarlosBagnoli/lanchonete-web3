@@ -17,5 +17,10 @@
 @if ($errors->any())
     <div class="alert alert-warning" role="alert">
         <strong>Atenção:</strong> verifique os campos do formulário.
+        <ul class="mb-0 mt-2">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
 @endif

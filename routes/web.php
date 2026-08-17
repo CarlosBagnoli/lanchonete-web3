@@ -14,7 +14,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sobre', [SobreController::class, 'index'])->name('sobre');
 Route::get('/relatorios/categorias.csv', [CategoriaController::class, 'exportCsv'])->name('relatorios.categorias.csv');
 Route::get('/contato', [ContatoController::class, 'create'])->name('contato.create');
-Route ::resource('produtos', ProdutoController::class);
+// Rotas de produtos registradas abaixo dentro do grupo `auth` (evita exposição pública)
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register.form')->middleware('guest');
 Route::post('/register', [AuthController::class, 'register'])->name('register')->middleware('guest');
 
@@ -30,12 +30,18 @@ Route::middleware(['auth'])->group(function () {
 
     // rotas para itens de um pedido
     Route::post('pedidos/{pedido}/itens', [ItemPedidoController::class, 'store'])->name('pedidos.itens.store');
+    Route::put('pedidos/{pedido}/itens/{itemPedido}', [ItemPedidoController::class, 'update'])->name('pedidos.itens.update');
     Route::delete('pedidos/{pedido}/itens/{itemPedido}', [ItemPedidoController::class, 'destroy'])->name('pedidos.itens.destroy');
 
     Route::get('/minha-conta', [AuthController::class, 'showAccount'])->name('minha-conta');
     Route::post('/minha-conta', [AuthController::class, 'updateAccount'])->name('minha-conta.update');
 });
+// Rotas administrativas para gerenciamento de usuários (apenas admin)
+Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
+    Route::get('usuarios', [\App\Http\Controllers\UserController::class, 'index'])->name('admin.usuarios.index');
+    Route::post('usuarios/{user}/role', [\App\Http\Controllers\UserController::class, 'updateRole'])->name('admin.usuarios.updateRole');
+});
 Route::middleware(['auth'])->group(function () {
     Route::resource('categorias', CategoriaController::class)
-        ->middleware('role:gerente');
+        ->middleware('role:admin');
 });

@@ -35,47 +35,68 @@
                 <input type="number" name="preco" id="preco" class="form-control @error('preco') is-invalid @enderror" 
                        step="0.01" value="{{ old('preco', $produto->preco) }}" required>
             </div>
-            
+            <div class="col-md-4 mb-3">
+                <label for="categoria_id" class="form-label">Categoria</label>
+                <select name="categoria_id" id="categoria_id" class="form-control @error('categoria_id') is-invalid @enderror" required>
+                    <option value="">Selecione uma categoria</option>
+                    @foreach($categorias as $categoria)
+                        <option value="{{ $categoria->id }}" {{ old('categoria_id', $produto->categoria_id) == $categoria->id ? 'selected' : '' }}>
+                            {{ $categoria->nome }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
             <div class="col-md-4 mb-3">
                 <label for="estoque" class="form-label">Estoque</label>
                 <input type="number" name="estoque" id="estoque" class="form-control @error('estoque') is-invalid @enderror" 
                        value="{{ old('estoque', $produto->estoque) }}" required>
             </div>
 
-            <div class="col-md-4 mb-3">
-                <label for="categoria_id" class="form-label">Categoria</label>
-                <select name="categoria_id" id="categoria_id" class="form-select @error('categoria_id') is-invalid @enderror" required>
-                    <option value="">Selecione...</option>
-                    @foreach($categorias as $cat)
-                        <option value="{{ $cat->id }}" 
-                            {{ old('categoria_id', $produto->categoria_id) == $cat->id ? 'selected' : '' }}>
-                            {{ $cat->nome }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
+            <div class="mb-4 card p-3 bg-light">
+                <label for="imagem" class="form-label fw-bold">Imagem do Produto</label>
 
-        <div class="mb-4 card p-3 bg-light">
-            <label for="imagem" class="form-label fw-bold">Imagem do Produto</label>
-            <input type="file" name="imagem" id="imagem" class="form-control @error('imagem') is-invalid @enderror">
-            <small class="text-muted">Deixe em branco para manter a imagem atual.</small>
-            
-            @if($produto->imagem)
-                <div class="mt-3">
-                    <p class="mb-1 small text-secondary">Imagem atual:</p>
-                    <img src="{{ asset('storage/' . $produto->imagem) }}" 
-                         alt="{{ $produto->nome }}" 
-                         class="img-thumbnail shadow-sm" 
-                         style="max-width: 150px; height: auto;">
-                </div>
-            @endif
-        </div>
+                <input type="file" name="imagem" id="imagem" accept="image/*" class="form-control @error('imagem') is-invalid @enderror">
+                <div class="form-text">Deixe em branco para manter a imagem atual. Formatos aceitos: JPG, PNG ou WEBP (Máx. 2MB).</div>
+                @error('imagem')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+
+                @if($produto->imagem)
+                    <div class="mt-3">
+                        <p class="mb-1 small text-secondary">Imagem atual:</p>
+                        <img id="preview" src="{{ asset('imagens/produtos/' . $produto->imagem) }}" 
+                             alt="{{ $produto->nome }}" 
+                             class="img-thumbnail shadow-sm" 
+                             style="max-width: 150px; height: auto;">
+                    </div>
+                @else
+                    <div class="mt-3">
+                        <p class="mb-1 small text-secondary">Sem imagem</p>
+                        <img id="preview" src="" alt="Sem imagem" class="img-thumbnail shadow-sm" style="max-width: 150px; height: auto; display:none;">
+                    </div>
+                @endif
+            </div>
 
         <div class="d-flex gap-2 border-top pt-3">
             <button type="submit" class="btn btn-primary px-4">Salvar Alterações</button>
             <a href="{{ route('produtos.index') }}" class="btn btn-light border">Cancelar</a>
         </div>
     </form>
+    <script>
+        (function(){
+            const input = document.getElementById('imagem');
+            const preview = document.getElementById('preview');
+            if(!input || !preview) return;
+            input.addEventListener('change', function(e){
+                const file = e.target.files[0];
+                if(file){
+                    preview.src = URL.createObjectURL(file);
+                    preview.style.display = '';
+                } else {
+                    preview.style.display = 'none';
+                }
+            });
+        })();
+    </script>
 </div>
 @endsection

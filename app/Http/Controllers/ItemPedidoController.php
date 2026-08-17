@@ -62,4 +62,23 @@ class ItemPedidoController extends Controller
         return redirect()->route('pedidos.edit', $pedido)
             ->with('sucesso', 'Item removido!');
     }
+
+    public function update(Request $request, Pedido $pedido, ItemPedido $itemPedido)
+    {
+        abort_unless($itemPedido->pedido_id === $pedido->id, 404);
+
+        $dados = $request->validate([
+            'quantidade' => 'required|integer|min:1|max:999',
+        ]);
+
+        $itemPedido->quantidade = $dados['quantidade'];
+        $itemPedido->subtotal = $itemPedido->preco_unitario * $itemPedido->quantidade;
+        $itemPedido->save();
+
+        // Recalcula total do pedido
+        $pedido->total = ItemPedido::where('pedido_id', $pedido->id)->sum('subtotal');
+        $pedido->save();
+
+        return redirect()->route('pedidos.edit', $pedido)->with('sucesso', 'Quantidade atualizada.');
+    }
 }

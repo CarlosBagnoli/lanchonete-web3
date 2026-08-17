@@ -5,10 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Produto;
 use App\Models\Categoria;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+
+use Illuminate\Support\Facades\File; 
 
 class ProdutoController extends Controller
 {
+    public function __construct()
+    {
+        // Garante que apenas usuários com role 'admin' podem criar/editar/excluir produtos
+        $this->middleware('role:admin')->only(['create', 'store', 'edit', 'update', 'destroy']);
+    }
     // Listar todos os produtos (Index)
     public function index(Request $request)
     {
@@ -43,6 +49,7 @@ class ProdutoController extends Controller
     }
 
     // Salvar no banco (Store)
+        // Salvar no banco (Store)
     public function store(Request $request)
     {
         $dados = $request->validate([
@@ -54,22 +61,20 @@ class ProdutoController extends Controller
             'imagem'       => 'nullable|image|max:2048',
         ]);
 
-        // tratar upload de imagem
-        if ($request->hasFile('imagem')) {
-            $dados['imagem'] = $request->file('imagem')->store('produtos', 'public');
+        
+        $dados['ativo'] = $request->has('ativo') ? 1 : 0;
+
+       
+        if ($request->hasFile('imagem') && $request->file('imagem')->isValid()) {
+            $nomeImagem = time() . '_' . uniqid() . '.' . $request->imagem->extension();
+            $request->imagem->move(public_path('imagens/produtos'), $nomeImagem);
+            $dados['imagem'] = $nomeImagem;
         }
 
         Produto::create($dados);
 
         return redirect()->route('produtos.index')
             ->with('success', 'Produto cadastrado com sucesso!');
-    }
-
-    // Mostrar formulário de edição (Edit)
-    public function edit(Produto $produto)
-    {
-        $categorias = Categoria::where('ativa', true)->get();
-        return view('produtos.edit', compact('produto', 'categorias'));
     }
 
     // Atualizar no banco (Update)
@@ -84,13 +89,24 @@ class ProdutoController extends Controller
             'imagem'       => 'nullable|image|max:2048',
         ]);
 
-        // tratar upload de nova imagem: remover antiga
-        if ($request->hasFile('imagem')) {
-            // remover imagem antiga se existir
+        // TRATAMENTO DO CHECKBOX 'ATIVO'
+        $dados['ativo'] = $request->has('ativo') ? 1 : 0;
+
+        // Tratar upload de nova imagem: remover antiga e salvar a nova na pasta public
+        if ($request->hasFile('imagem') && $request->file('imagem')->isValid()) {
+            
+            // Remover imagem antiga física da pasta public, se existir
             if ($produto->imagem) {
-                Storage::disk('public')->delete($produto->imagem);
+                $caminhoAntigo = public_path('imagens/produtos/' . $produto->imagem);
+                if (\Illuminate\Support\Facades\File::exists($caminhoAntigo)) {
+                    \Illuminate\Support\Facades\File::delete($caminhoAntigo);
+                }
             }
-            $dados['imagem'] = $request->file('imagem')->store('produtos', 'public');
+
+            // Faz o upload da nova imagem
+            $nomeImagem = time() . '_' . uniqid() . '.' . $request->imagem->extension();
+            $request->imagem->move(public_path('imagens/produtos'), $nomeImagem);
+            $dados['imagem'] = $nomeImagem;
         }
 
         $produto->update($dados);
@@ -99,13 +115,25 @@ class ProdutoController extends Controller
             ->with('success', 'Produto atualizado com sucesso!');
     }
 
+
+    // Mostrar formulário de edição (Edit)
+    public function edit(Produto $produto)
+    {
+        $categorias = Categoria::where('ativa', true)->get();
+        return view('produtos.edit', compact('produto', 'categorias'));
+    }
+
+
+
     // Deletar do banco (Destroy)
     public function destroy(Produto $produto)
     {
-
-        // remover imagem associada
+        // Remover imagem associada fisicamente da pasta public
         if ($produto->imagem) {
-            Storage::disk('public')->delete($produto->imagem);
+            $caminhoImagem = public_path('imagens/produtos/' . $produto->imagem);
+            if (File::exists($caminhoImagem)) {
+                File::delete($caminhoImagem);
+            }
         }
 
         $produto->delete();

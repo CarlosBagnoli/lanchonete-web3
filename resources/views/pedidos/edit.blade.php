@@ -5,11 +5,30 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Pedido #{{ $pedido->id }}</h2>
-        <a class="btn btn-outline-secondary" href="{{ route('pedidos.index') }}">Voltar</a>
+        <div class="d-flex gap-2">
+            @auth
+                @if(in_array(auth()->user()->role, ['admin','atendente']))
+                    <form method="POST" action="{{ route('pedidos.destroy', $pedido) }}" onsubmit="return confirm('Deseja excluir este pedido?')">
+                        @csrf
+                        @method('DELETE')
+                        <button class="btn btn-outline-danger">Excluir Pedido</button>
+                    </form>
+                @endif
+            @endauth
+            <a class="btn btn-outline-secondary" href="{{ route('pedidos.index') }}">Voltar</a>
+        </div>
     </div>
 
     <div class="row g-3">
         <div class="col-lg-5">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6 class="mb-2">Resumo do pedido</h6>
+                    <p class="mb-1"><strong>Status:</strong> {{ $pedido->status }}</p>
+                    <p class="mb-1"><strong>Observações:</strong> {{ $pedido->observacoes ?? '—' }}</p>
+                    <p class="mb-0"><strong>Total atual:</strong> R$ {{ number_format($pedido->total,2,',','.') }}</p>
+                </div>
+            </div>
             <div class="card">
                 <div class="card-body">
                     <h5 class="fw-bold">Adicionar item</h5>
@@ -53,7 +72,14 @@
                             @forelse($pedido->itens as $item)
                                 <tr>
                                     <td>{{ $item->produto->nome ?? '—' }}</td>
-                                    <td class="text-end">{{ $item->quantidade }}</td>
+                                    <td class="text-end">
+                                        <form method="POST" action="{{ route('pedidos.itens.update', [$pedido, $item]) }}" class="d-inline d-flex justify-content-end align-items-center">
+                                            @csrf
+                                            @method('PUT')
+                                            <input type="number" name="quantidade" value="{{ $item->quantidade }}" min="1" max="999" class="form-control form-control-sm me-2" style="width:80px;">
+                                            <button class="btn btn-sm btn-outline-primary">Atualizar</button>
+                                        </form>
+                                    </td>
                                     <td class="text-end">R$ {{ number_format($item->preco_unitario,2,',','.') }}</td>
                                     <td class="text-end">R$ {{ number_format($item->subtotal,2,',','.') }}</td>
                                     <td class="text-end">

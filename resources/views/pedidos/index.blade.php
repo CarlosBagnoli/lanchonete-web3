@@ -29,6 +29,16 @@
                             <td class="text-end">R$ {{ number_format($p->total, 2, ',', '.') }}</td>
                             <td class="text-end">
                                 <a class="btn btn-sm btn-outline-secondary" href="{{ route('pedidos.edit', $p) }}">Abrir</a>
+                                @auth
+                                    @if(in_array(auth()->user()->role, ['admin','atendente']))
+                                        <form method="POST" action="{{ route('pedidos.destroy', $p) }}" class="d-inline ms-1"
+                                              onsubmit="return confirm('Deseja excluir este pedido?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="btn btn-sm btn-outline-danger">Excluir</button>
+                                        </form>
+                                    @endif
+                                @endauth
                             </td>
                         </tr>
                     @empty

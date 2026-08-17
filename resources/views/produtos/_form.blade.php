@@ -36,6 +36,25 @@
     </div>
 </div>
 
+
+
+<div class="mb-3">
+    <label class="form-label">Imagem do Produto</label>
+    
+   
+    @if($isEdit && !empty($produto->imagem))
+        <div class="mb-2">
+          
+            <img src="{{ asset('imagens/produtos/' . $produto->imagem) }}" alt="Imagem do Produto" class="img-thumbnail" style="max-height: 150px;">
+        </div>
+    @endif
+
+    <input type="file" name="imagem" class="form-control @error('imagem') is-invalid @enderror" accept="image/*">
+    <div class="form-text">Deixe em branco para manter a imagem atual (se aplicável).</div>
+    @error('imagem') <div class="invalid-feedback">{{ $message }}</div> @enderror
+</div>
+
+
 <div class="mb-3">
     <label class="form-label">Descrição</label>
     <textarea name="descricao" class="form-control" rows="3">{{ old('descricao', $produto->descricao ?? '') }}</textarea>

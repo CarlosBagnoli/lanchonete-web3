@@ -6,8 +6,9 @@
 @auth
     <li class="nav-item"><a class="nav-link" href="{{ route('dashboard') }}">Dashboard</a></li>
 
-    @if (auth()->user()->role === 'gerente')
+    @if (auth()->user()->role === 'admin')
         <li class="nav-item"><a class="nav-link" href="{{ route('categorias.index') }}">Categorias</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ route('admin.usuarios.index') }}">Funcionários</a></li>
     @endif
 
     <li class="nav-item"><a class="nav-link" href="{{ route('produtos.index') }}">Produtos</a></li>

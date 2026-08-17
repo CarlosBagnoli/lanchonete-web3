@@ -5,7 +5,11 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>Listagem de Produtos</h2>
-        <a href="{{ route('produtos.create') }}" class="btn btn-success">Novo Produto</a>
+        @auth
+            @if(auth()->user()->role === 'admin')
+                <a href="{{ route('produtos.create') }}" class="btn btn-success">Novo Produto</a>
+            @endif
+        @endauth
     </div>
 
     <div class="card shadow-sm mb-3">
@@ -69,20 +73,29 @@
                     <td>R$ {{ number_format($produto->preco, 2, ',', '.') }}</td>
                     <td>{{ $produto->categoria->nome }}</td>
                     <td>
+                        {{-- AQUI FOI ALTERADO PARA USAR ASSET() --}}
                         @if($produto->imagem)
-                            <img src="{{ Storage::url($produto->imagem) }}" alt="Imagem de {{ $produto->nome }}" width="100">
+                            <img src="{{ asset('imagens/produtos/' . $produto->imagem) }}" alt="Imagem de {{ $produto->nome }}" width="80" class="img-thumbnail rounded">
                         @else
-                            Sem imagem
+                            <span class="badge bg-secondary">Sem imagem</span>
                         @endif
                     </td>
                     <td>
-                        <a href="{{ route('produtos.edit', $produto) }}" class="btn btn-sm btn-primary">Editar</a>
-                        <form method="POST" action="{{ route('produtos.destroy', $produto) }}" class="d-inline"
-                              onsubmit="return confirm('Tem certeza que deseja excluir?')">
-                            @csrf
-                            @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger">Excluir</button>
-                        </form>
+                        @auth
+                            @if(auth()->user()->role === 'admin')
+                                <a href="{{ route('produtos.edit', $produto) }}" class="btn btn-sm btn-primary">Editar</a>
+                                <form method="POST" action="{{ route('produtos.destroy', $produto) }}" class="d-inline"
+                                      onsubmit="return confirm('Tem certeza que deseja excluir?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-sm btn-outline-danger">Excluir</button>
+                                </form>
+                            @else
+                                <span class="text-muted small">Sem permissões</span>
+                            @endif
+                        @else
+                            <span class="text-muted small">Login necessário</span>
+                        @endauth
                     </td>
                 </tr>
                 @endforeach
