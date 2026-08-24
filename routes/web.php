@@ -24,6 +24,12 @@ Route::post('/login', [AuthController::class, 'login'])->name('login')->middlewa
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::middleware(['auth'])->group(function () {
+
+Route::post('pedidos/{pedido}/itens-json', [ItemPedidoController::class, 'storeJson'])
+    ->name('pedidos.itens.storeJson');
+
+Route::delete('pedidos/{pedido}/itens-json/{itemPedido}', [ItemPedidoController::class, 'destroyJson'])
+    ->name('pedidos.itens.destroyJson');
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::resource('produtos', ProdutoController::class);
     Route::resource('pedidos', PedidoController::class);

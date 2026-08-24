@@ -94,4 +94,81 @@ class ItemPedidoController extends Controller
 
         return redirect()->route('pedidos.edit', $pedido)->with('sucesso', 'Quantidade atualizada.');
     }
+
+    public function storeJson(Request $request, Pedido $pedido)
+    {
+        $this->assertPedidoAberto($pedido);
+
+        $dados = $request->validate([
+            'produto_id' => 'required|exists:produtos,id',
+            'quantidade' => 'required|integer|min:1|max:99',
+        ]);
+
+        $produto = Produto::findOrFail($dados['produto_id']);
+
+        $preco = $produto->preco;
+
+        $item = ItemPedido::where('pedido_id', $pedido->id)
+            ->where('produto_id', $produto->id)
+            ->first();
+
+        if ($item) {
+            $item->quantidade += $dados['quantidade'];
+            $item->preco_unitario = $preco;
+            $item->subtotal = $item->quantidade * $preco;
+            $item->save();
+        } else {
+            $item = ItemPedido::create([
+                'pedido_id' => $pedido->id,
+                'produto_id' => $produto->id,
+                'quantidade' => $dados['quantidade'],
+                'preco_unitario' => $preco,
+                'subtotal' => $dados['quantidade'] * $preco,
+            ]);
+        }
+
+        $pedido->total = ItemPedido::where('pedido_id', $pedido->id)->sum('subtotal');
+        $pedido->save();
+
+        $item->load('produto');
+
+        return response()->json([
+            'message' => 'Item adicionado!',
+            'pedido' => [
+                'id' => $pedido->id,
+                'total' => (float) $pedido->total,
+            ],
+            'item' => [
+                'id' => $item->id,
+                'produto' => [
+                    'id' => $item->produto->id,
+                    'nome' => $item->produto->nome,
+                ],
+                'quantidade' => (int) $item->quantidade,
+                'preco_unitario' => (float) $item->preco_unitario,
+                'subtotal' => (float) $item->subtotal,
+            ]
+        ], 200);
+    }
+
+    public function destroyJson(Pedido $pedido, ItemPedido $itemPedido)
+    {
+        $this->assertPedidoAberto($pedido);
+
+        abort_unless($itemPedido->pedido_id === $pedido->id, 404);
+
+        $itemPedido->delete();
+
+        $pedido->total = ItemPedido::where('pedido_id', $pedido->id)->sum('subtotal');
+        $pedido->save();
+
+        return response()->json([
+            'message' => 'Item removido!',
+            'pedido' => [
+                'id' => $pedido->id,
+                'total' => (float) $pedido->total,
+            ],
+            'removed_item_id' => (int) $itemPedido->id,
+        ], 200);
+    }
 }
