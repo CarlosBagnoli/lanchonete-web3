@@ -8,6 +8,13 @@
         <div class="d-flex gap-2">
             @auth
                 @if(in_array(auth()->user()->role, ['admin','atendente']))
+                    @if($pedido->nextStatus())
+                        <form method="POST" action="{{ route('pedidos.status.update', $pedido) }}">
+                            @csrf
+                            <input type="hidden" name="status" value="{{ $pedido->nextStatus() }}">
+                            <button class="btn btn-success">{{ ucfirst($pedido->nextStatus()) }}</button>
+                        </form>
+                    @endif
                     <form method="POST" action="{{ route('pedidos.destroy', $pedido) }}" onsubmit="return confirm('Deseja excluir este pedido?')">
                         @csrf
                         @method('DELETE')
@@ -32,23 +39,27 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="fw-bold">Adicionar item</h5>
-                    <form method="POST" action="{{ route('pedidos.itens.store', $pedido) }}">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label">Produto</label>
-                            <select name="produto_id" class="form-select" required>
-                                <option value="">Selecione...</option>
-                                @foreach($produtos as $prod)
-                                    <option value="{{ $prod->id }}">{{ $prod->nome }} (R$ {{ number_format($prod->preco,2,',','.') }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Quantidade</label>
-                            <input type="number" name="quantidade" class="form-control" value="1" min="1" max="99" required>
-                        </div>
-                        <button class="btn btn-primary">Adicionar</button>
-                    </form>
+                    @if($pedido->canEdit())
+                        <form method="POST" action="{{ route('pedidos.itens.store', $pedido) }}">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label">Produto</label>
+                                <select name="produto_id" class="form-select" required>
+                                    <option value="">Selecione...</option>
+                                    @foreach($produtos as $prod)
+                                        <option value="{{ $prod->id }}">{{ $prod->nome }} (R$ {{ number_format($prod->preco,2,',','.') }})</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Quantidade</label>
+                                <input type="number" name="quantidade" class="form-control" value="1" min="1" max="99" required>
+                            </div>
+                            <button class="btn btn-primary">Adicionar</button>
+                        </form>
+                    @else
+                        <div class="alert alert-warning mb-0">Pedido fechado. Não é possível adicionar ou remover itens.</div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -73,22 +84,30 @@
                                 <tr>
                                     <td>{{ $item->produto->nome ?? '—' }}</td>
                                     <td class="text-end">
-                                        <form method="POST" action="{{ route('pedidos.itens.update', [$pedido, $item]) }}" class="d-inline d-flex justify-content-end align-items-center">
-                                            @csrf
-                                            @method('PUT')
-                                            <input type="number" name="quantidade" value="{{ $item->quantidade }}" min="1" max="999" class="form-control form-control-sm me-2" style="width:80px;">
-                                            <button class="btn btn-sm btn-outline-primary">Atualizar</button>
-                                        </form>
+                                        @if($pedido->canEdit())
+                                            <form method="POST" action="{{ route('pedidos.itens.update', [$pedido, $item]) }}" class="d-inline d-flex justify-content-end align-items-center">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="number" name="quantidade" value="{{ $item->quantidade }}" min="1" max="999" class="form-control form-control-sm me-2" style="width:80px;">
+                                                <button class="btn btn-sm btn-outline-primary">Atualizar</button>
+                                            </form>
+                                        @else
+                                            <span class="text-muted">{{ $item->quantidade }}</span>
+                                        @endif
                                     </td>
                                     <td class="text-end">R$ {{ number_format($item->preco_unitario,2,',','.') }}</td>
                                     <td class="text-end">R$ {{ number_format($item->subtotal,2,',','.') }}</td>
                                     <td class="text-end">
-                                        <form method="POST" action="{{ route('pedidos.itens.destroy', [$pedido, $item]) }}" class="d-inline"
-                                              onsubmit="return confirm('Remover este item?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-sm btn-outline-danger">Remover</button>
-                                        </form>
+                                        @if($pedido->canEdit())
+                                            <form method="POST" action="{{ route('pedidos.itens.destroy', [$pedido, $item]) }}" class="d-inline"
+                                                  onsubmit="return confirm('Remover este item?')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-sm btn-outline-danger">Remover</button>
+                                            </form>
+                                        @else
+                                            <span class="text-muted">—</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @empty

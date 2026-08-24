@@ -6,7 +6,6 @@ class CategoriaSeeder extends Seeder
 {
     public function run(): void
     {
-        // Exemplos fixos (úteis para desenvolvimento)
         $fixas = [
             ['nome' => 'Bebidas', 'descricao' => 'Sucos, refrigerantes e água', 'ativa' => true],
             ['nome' => 'Lanches', 'descricao' => 'Sanduíches e porções', 'ativa' => true],
@@ -17,7 +16,6 @@ class CategoriaSeeder extends Seeder
             Categoria::firstOrCreate(['nome' => $c['nome']], $c);
         }
 
-        // Complemento com dados fake
         Categoria::factory()->count(5)->create();
     }
 }

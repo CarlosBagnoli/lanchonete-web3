@@ -5,7 +5,10 @@
 
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Pedidos</h2>
-        <a class="btn btn-primary" href="{{ route('pedidos.create') }}">Novo Pedido</a>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary" href="{{ route('pedidos.relatorio.dia') }}">Relatório do dia</a>
+            <a class="btn btn-primary" href="{{ route('pedidos.create') }}">Novo Pedido</a>
+        </div>
     </div>
 
     <div class="card">

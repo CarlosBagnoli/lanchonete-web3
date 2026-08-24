@@ -9,8 +9,17 @@ use Illuminate\Http\Request;
 
 class ItemPedidoController extends Controller
 {
+    protected function assertPedidoAberto(Pedido $pedido): void
+    {
+        if ($pedido->isClosed()) {
+            abort(403, 'Pedido fechado não pode receber alterações de itens.');
+        }
+    }
+
     public function store(Request $request, Pedido $pedido)
     {
+        $this->assertPedidoAberto($pedido);
+
         $dados = $request->validate([
             'produto_id' => 'required|exists:produtos,id',
             'quantidade' => 'required|integer|min:1|max:99',
@@ -51,6 +60,8 @@ class ItemPedidoController extends Controller
 
     public function destroy(Pedido $pedido, ItemPedido $itemPedido)
     {
+        $this->assertPedidoAberto($pedido);
+
         // Garante que o item pertence ao pedido
         abort_unless($itemPedido->pedido_id === $pedido->id, 404);
 
@@ -65,6 +76,8 @@ class ItemPedidoController extends Controller
 
     public function update(Request $request, Pedido $pedido, ItemPedido $itemPedido)
     {
+        $this->assertPedidoAberto($pedido);
+
         abort_unless($itemPedido->pedido_id === $pedido->id, 404);
 
         $dados = $request->validate([

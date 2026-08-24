@@ -27,11 +27,13 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/dashboard', 'dashboard')->name('dashboard');
     Route::resource('produtos', ProdutoController::class);
     Route::resource('pedidos', PedidoController::class);
+    Route::get('pedidos/relatorio/dia', [PedidoController::class, 'relatorioDia'])->name('pedidos.relatorio.dia');
 
     // rotas para itens de um pedido
     Route::post('pedidos/{pedido}/itens', [ItemPedidoController::class, 'store'])->name('pedidos.itens.store');
     Route::put('pedidos/{pedido}/itens/{itemPedido}', [ItemPedidoController::class, 'update'])->name('pedidos.itens.update');
     Route::delete('pedidos/{pedido}/itens/{itemPedido}', [ItemPedidoController::class, 'destroy'])->name('pedidos.itens.destroy');
+    Route::post('pedidos/{pedido}/status', [PedidoController::class, 'updateStatus'])->name('pedidos.status.update');
 
     Route::get('/minha-conta', [AuthController::class, 'showAccount'])->name('minha-conta');
     Route::post('/minha-conta', [AuthController::class, 'updateAccount'])->name('minha-conta.update');
