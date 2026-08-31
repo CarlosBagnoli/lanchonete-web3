@@ -38,6 +38,7 @@ Route::delete('pedidos/{pedido}/itens-json/{itemPedido}', [ItemPedidoController:
     // rotas para itens de um pedido
     Route::post('pedidos/{pedido}/itens', [ItemPedidoController::class, 'store'])->name('pedidos.itens.store');
     Route::put('pedidos/{pedido}/itens/{itemPedido}', [ItemPedidoController::class, 'update'])->name('pedidos.itens.update');
+    Route::patch('pedidos/{pedido}/itens/{itemPedido}/quantidade', [ItemPedidoController::class, 'updateQuantity'])->name('pedidos.itens.quantidade.update');
     Route::delete('pedidos/{pedido}/itens/{itemPedido}', [ItemPedidoController::class, 'destroy'])->name('pedidos.itens.destroy');
     Route::post('pedidos/{pedido}/status', [PedidoController::class, 'updateStatus'])->name('pedidos.status.update');
 

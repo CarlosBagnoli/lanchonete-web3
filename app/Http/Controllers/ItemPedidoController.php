@@ -92,7 +92,28 @@ class ItemPedidoController extends Controller
         $pedido->total = ItemPedido::where('pedido_id', $pedido->id)->sum('subtotal');
         $pedido->save();
 
-        return redirect()->route('pedidos.edit', $pedido)->with('sucesso', 'Quantidade atualizada.');
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => 'Quantidade atualizada com sucesso.',
+                'pedido' => [
+                    'id' => $pedido->id,
+                    'total' => (float) $pedido->total,
+                ],
+                'item' => [
+                    'id' => $itemPedido->id,
+                    'quantidade' => (int) $itemPedido->quantidade,
+                    'preco_unitario' => (float) $itemPedido->preco_unitario,
+                    'subtotal' => (float) $itemPedido->subtotal,
+                ],
+            ]);
+        }
+
+        return redirect()->route('pedidos.edit', $pedido)->with('sucesso', 'Quantidade atualizada com sucesso.');
+    }
+
+    public function updateQuantity(Request $request, Pedido $pedido, ItemPedido $itemPedido)
+    {
+        return $this->update($request, $pedido, $itemPedido);
     }
 
     public function storeJson(Request $request, Pedido $pedido)
@@ -133,7 +154,7 @@ class ItemPedidoController extends Controller
         $item->load('produto');
 
         return response()->json([
-            'message' => 'Item adicionado!',
+            'message' => 'Item adicionado com sucesso.',
             'pedido' => [
                 'id' => $pedido->id,
                 'total' => (float) $pedido->total,
@@ -163,7 +184,7 @@ class ItemPedidoController extends Controller
         $pedido->save();
 
         return response()->json([
-            'message' => 'Item removido!',
+            'message' => 'Item removido com sucesso.',
             'pedido' => [
                 'id' => $pedido->id,
                 'total' => (float) $pedido->total,
