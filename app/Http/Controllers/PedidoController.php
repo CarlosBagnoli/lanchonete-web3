@@ -52,6 +52,48 @@ class PedidoController extends Controller
         return view('pedidos.edit', compact('pedido', 'produtos'));
     }
 
+    public function updateAddress(Request $request, Pedido $pedido)
+    {
+        $dados = $request->validate([
+            'cep' => ['nullable', 'string'],
+            'logradouro' => ['nullable', 'string', 'max:255'],
+            'bairro' => ['nullable', 'string', 'max:255'],
+            'cidade' => ['nullable', 'string', 'max:255'],
+            'uf' => ['nullable', 'string', 'size:2'],
+        ]);
+
+        $cepLimpo = $dados['cep'] ? preg_replace('/\D/', '', $dados['cep']) : null;
+
+        if ($cepLimpo !== null && ! preg_match('/^\d{8}$/', $cepLimpo)) {
+            return response()->json([
+                'message' => 'CEP inválido. Informe 8 números válidos.',
+                'errors' => ['cep' => ['CEP deve conter exatamente 8 números válidos.']],
+            ], 422);
+        }
+
+        $pedido->fill([
+            'cep' => $cepLimpo,
+            'logradouro' => $dados['logradouro'] ?? null,
+            'bairro' => $dados['bairro'] ?? null,
+            'cidade' => $dados['cidade'] ?? null,
+            'uf' => $dados['uf'] ?? null,
+        ]);
+
+        $pedido->save();
+
+        return response()->json([
+            'message' => 'Endereço do pedido salvo com sucesso.',
+            'pedido' => [
+                'id' => $pedido->id,
+                'cep' => $pedido->cep,
+                'logradouro' => $pedido->logradouro,
+                'bairro' => $pedido->bairro,
+                'cidade' => $pedido->cidade,
+                'uf' => $pedido->uf,
+            ],
+        ]);
+    }
+
     public function updateStatus(Request $request, Pedido $pedido)
     {
         $dados = $request->validate([

@@ -6,6 +6,10 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Funcionários</h1>
+        <form method="POST" action="{{ route('admin.gerente.cep.cache.clear') }}" class="d-inline">
+            @csrf
+            <button type="submit" class="btn btn-outline-warning btn-sm">Limpar cache do CEP</button>
+        </form>
     </div>
 
     @include('partials.alerts')

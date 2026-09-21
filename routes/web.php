@@ -9,6 +9,7 @@ use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ItemPedidoController;
+use App\Http\Controllers\CepController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sobre', [SobreController::class, 'index'])->name('sobre');
@@ -41,14 +42,23 @@ Route::delete('pedidos/{pedido}/itens-json/{itemPedido}', [ItemPedidoController:
     Route::patch('pedidos/{pedido}/itens/{itemPedido}/quantidade', [ItemPedidoController::class, 'updateQuantity'])->name('pedidos.itens.quantidade.update');
     Route::delete('pedidos/{pedido}/itens/{itemPedido}', [ItemPedidoController::class, 'destroy'])->name('pedidos.itens.destroy');
     Route::post('pedidos/{pedido}/status', [PedidoController::class, 'updateStatus'])->name('pedidos.status.update');
+    Route::post('pedidos/{pedido}/endereco', [PedidoController::class, 'updateAddress'])->name('pedidos.endereco.update');
 
     Route::get('/minha-conta', [AuthController::class, 'showAccount'])->name('minha-conta');
     Route::post('/minha-conta', [AuthController::class, 'updateAccount'])->name('minha-conta.update');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/cep/{cep}', [CepController::class, 'show'])->name('cep.show');
 });
 // Rotas administrativas para gerenciamento de usuários (apenas admin)
 Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     Route::get('usuarios', [\App\Http\Controllers\UserController::class, 'index'])->name('admin.usuarios.index');
     Route::post('usuarios/{user}/role', [\App\Http\Controllers\UserController::class, 'updateRole'])->name('admin.usuarios.updateRole');
+});
+
+Route::middleware(['auth','role:admin'])->prefix('admin/gerente')->group(function () {
+    Route::post('cep/cache/clear', [CepController::class, 'clearCache'])->name('admin.gerente.cep.cache.clear');
 });
 Route::middleware(['auth'])->group(function () {
     Route::resource('categorias', CategoriaController::class)

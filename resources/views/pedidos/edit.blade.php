@@ -83,10 +83,49 @@
                             urlDelBase: "{{ url('pedidos/'.$pedido->id.'/itens-json') }}",
                             urlQtyBase: "{{ url('pedidos/'.$pedido->id.'/itens') }}"
                           };
+                          window.PW3CEP = {
+                            urlBase: "{{ url('/cep') }}"
+                          };
                         </script>
                     @else
                         <div class="alert alert-warning mb-0">Pedido fechado. Não é possível adicionar ou remover itens.</div>
                     @endif
+
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5 class="fw-bold">Entrega</h5>
+
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <label class="form-label">CEP</label>
+                                    <input id="cep" class="form-control" placeholder="00000-000" aria-invalid="false" value="{{ old('cep', $pedido->cep ?? '') }}">
+                                    <div id="cepError" class="invalid-feedback d-block" style="display: none !important;">&nbsp;</div>
+                                    <div class="form-text">Digite o CEP e clique em Buscar.</div>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button id="btnBuscarCep" class="btn btn-outline-secondary w-100" type="button">Buscar e salvar</button>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Logradouro</label>
+                                    <input id="logradouro" class="form-control" value="{{ old('logradouro', $pedido->logradouro ?? '') }}">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Bairro</label>
+                                    <input id="bairro" class="form-control" value="{{ old('bairro', $pedido->bairro ?? '') }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Cidade</label>
+                                    <input id="cidade" class="form-control" value="{{ old('cidade', $pedido->cidade ?? '') }}">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">UF</label>
+                                    <input id="uf" class="form-control" maxlength="2" value="{{ old('uf', $pedido->uf ?? '') }}">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -208,8 +247,38 @@ function showToast(title, body) {
     if (titleEl) titleEl.textContent = title;
     if (bodyEl) bodyEl.textContent = body;
 
-    const toast = bootstrap.Toast.getOrCreateInstance(el, { delay: 3000 });
+    const toast = bootstrap.Toast.getOrCreateInstance(el, { delay: 2500 });
     toast.show();
+}
+
+function onlyDigits(v) {
+    return (v || '').replace(/\D/g, '');
+}
+
+function applyCepMask(value) {
+    const digits = onlyDigits(value).slice(0, 8);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
+function setCepError(message) {
+    const cepInput = document.getElementById('cep');
+    const errorEl = document.getElementById('cepError');
+
+    if (!cepInput || !errorEl) return;
+
+    if (message) {
+        cepInput.classList.add('is-invalid');
+        cepInput.setAttribute('aria-invalid', 'true');
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+        return;
+    }
+
+    cepInput.classList.remove('is-invalid');
+    cepInput.setAttribute('aria-invalid', 'false');
+    errorEl.textContent = '';
+    errorEl.style.display = 'none';
 }
 
 function upsertRow(item) {
@@ -402,6 +471,119 @@ function attachQtyInput(input) {
 
 document.addEventListener('DOMContentLoaded', () => {
     syncMiniCart();
+
+    const cepInput = document.getElementById('cep');
+    const btnBuscarCep = document.getElementById('btnBuscarCep');
+
+    const getPedidoAddressPayload = () => ({
+        cep: onlyDigits(cepInput?.value || ''),
+        logradouro: document.getElementById('logradouro')?.value || '',
+        bairro: document.getElementById('bairro')?.value || '',
+        cidade: document.getElementById('cidade')?.value || '',
+        uf: document.getElementById('uf')?.value || ''
+    });
+
+    const savePedidoAddress = async (payload) => {
+        try {
+            const resp = await fetch(`{{ route('pedidos.endereco.update', $pedido) }}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken(),
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await resp.json().catch(() => ({}));
+            if (!resp.ok) {
+                console.error('Erro ao salvar endereço do pedido', data);
+                return false;
+            }
+
+            return true;
+        } catch (err) {
+            console.error('Falha ao salvar endereço do pedido', err);
+            return false;
+        }
+    };
+
+    cepInput?.addEventListener('input', () => {
+        const masked = applyCepMask(cepInput.value);
+        cepInput.value = masked;
+
+        const digits = onlyDigits(masked);
+        if (digits.length === 0) {
+            setCepError('');
+            return;
+        }
+
+        if (!/^\d{8}$/.test(digits)) {
+            setCepError('CEP inválido. Informe 8 números.');
+            return;
+        }
+
+        setCepError('');
+    });
+
+    ['logradouro', 'bairro', 'cidade', 'uf'].forEach((fieldId) => {
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+
+        field.addEventListener('blur', async () => {
+            const payload = getPedidoAddressPayload();
+            if (!payload.cep && !payload.logradouro && !payload.bairro && !payload.cidade && !payload.uf) {
+                return;
+            }
+
+            await savePedidoAddress(payload);
+        });
+    });
+
+    btnBuscarCep?.addEventListener('click', async () => {
+        const cep = onlyDigits(cepInput?.value || '');
+
+        if (!/^\d{8}$/.test(cep)) {
+            setCepError('CEP inválido. Informe 8 números válidos.');
+            showToast('Erro', 'CEP inválido. Informe 8 números válidos.');
+            return;
+        }
+
+        try {
+            const resp = await fetch(`${window.PW3CEP.urlBase}/${cep}`, {
+                headers: { 'Accept': 'application/json' }
+            });
+
+            const data = await resp.json();
+
+            if (!resp.ok) {
+                const msg = data?.errors?.cep?.[0] || data?.message || 'Falha ao consultar CEP.';
+                setCepError(msg);
+                showToast('Erro', msg);
+                return;
+            }
+
+            setCepError('');
+            const logradouro = data.logradouro || '';
+            const bairro = data.bairro || '';
+            const cidade = data.localidade || '';
+            const uf = data.uf || '';
+
+            document.getElementById('logradouro').value = logradouro;
+            document.getElementById('bairro').value = bairro;
+            document.getElementById('cidade').value = cidade;
+            document.getElementById('uf').value = uf;
+
+            const payload = { cep, logradouro, bairro, cidade, uf };
+            await savePedidoAddress(payload);
+            showToast('Sucesso', data.message);
+        } catch (e) {
+            console.error(e);
+            setCepError('Falha de conexão. Verifique servidor e internet.');
+            showToast('Erro', 'Falha de conexão. Verifique servidor e internet.');
+        }
+    });
 
     document.querySelectorAll('.qty-input').forEach((input) => {
         attachQtyInput(input);

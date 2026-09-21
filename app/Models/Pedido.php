@@ -24,6 +24,11 @@ class Pedido extends Model
         'status',
         'total',
         'observacoes',
+        'cep',
+        'logradouro',
+        'bairro',
+        'cidade',
+        'uf',
     ];
 
     public function user()
