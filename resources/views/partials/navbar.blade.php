@@ -28,6 +28,15 @@
                         <li class="nav-item"><a class="nav-link" href="{{ route('admin.usuarios.index') }}">Funcionários</a></li>
                     @endif
 
+                    @if (in_array(auth()->user()->role, ['admin', 'gerente'], true))
+                        <li class="nav-item">
+                            <form method="POST" action="{{ route('admin.gerente.cep.cache.clear') }}" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-warning btn-sm ms-lg-2">Limpar cache do CEP</button>
+                            </form>
+                        </li>
+                    @endif
+
                     <li class="nav-item"><a class="nav-link" href="{{ route('produtos.index') }}">Produtos</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ route('pedidos.index') }}">Pedidos</a></li>
 

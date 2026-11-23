@@ -8,37 +8,35 @@ use Illuminate\Support\Facades\Http;
 
 class CepController extends Controller
 {
-    private const CEP_TTL_MINUTES = 15;
-
     public function show(string $cep)
     {
-        // Normaliza CEP: mantém apenas números
-        $cep = preg_replace('/\D/', '', $cep);
+        // Normaliza o parâmetro antes de validar e consultar
+        $cep = preg_replace('/\D/', '', $cep) ?? '';
 
-        // Validação com regex para garantir CEP brasileiro válido
-        if (!preg_match('/^\d{8}$/', $cep)) {
+        if (! preg_match('/^\d{8}$/', $cep)) {
             return response()->json([
                 'message' => 'CEP inválido. Informe 8 números válidos.',
                 'cached' => false,
-                'errors' => ['cep' => ['CEP deve conter exatamente 8 números válidos.']]
+                'errors' => [
+                    'cep' => ['CEP deve conter exatamente 8 números válidos.'],
+                ],
             ], 422);
         }
 
         $cacheKey = "cep:$cep";
         $cached = Cache::has($cacheKey);
+        $ttlMinutes = max(1, (int) config('services.cep.cache_ttl', 15));
 
-        $data = Cache::remember($cacheKey, now()->addMinutes(self::CEP_TTL_MINUTES), function () use ($cep) {
-            // ViaCEP: https://viacep.com.br/ws/{cep}/json/
+        $data = Cache::remember($cacheKey, now()->addMinutes($ttlMinutes), function () use ($cep) {
             $resp = Http::timeout(3)->acceptJson()
                 ->get("https://viacep.com.br/ws/{$cep}/json/");
 
-            if (!$resp->ok()) {
+            if (! $resp->ok()) {
                 return ['_error' => 'Falha ao consultar serviço de CEP.'];
             }
 
             $json = $resp->json();
 
-            // ViaCEP retorna {"erro": true} quando não encontra
             if (isset($json['erro']) && $json['erro'] === true) {
                 return ['_error' => 'CEP não encontrado.'];
             }
@@ -47,7 +45,7 @@ class CepController extends Controller
         });
 
         $keys = Cache::get('cep:keys', []);
-        if (!in_array($cacheKey, $keys, true)) {
+        if (! in_array($cacheKey, $keys, true)) {
             $keys[] = $cacheKey;
             Cache::put('cep:keys', $keys, now()->addDays(7));
         }
@@ -56,10 +54,10 @@ class CepController extends Controller
             return response()->json([
                 'message' => $data['_error'],
                 'cached' => $cached,
+                'errors' => ['cep' => [$data['_error']]],
             ], 404);
         }
 
-        // Padroniza resposta para o front
         return response()->json([
             'message' => $cached ? 'CEP encontrado em cache!' : 'CEP encontrado!',
             'cached' => $cached,

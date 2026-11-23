@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
@@ -35,4 +34,7 @@ return [
         ],
     ],
 
+    'cep' => [
+        'cache_ttl' => (int) env('CEP_CACHE_TTL_MINUTES', 15),
+    ],
 ];

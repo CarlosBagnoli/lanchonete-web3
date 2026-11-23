@@ -98,7 +98,7 @@
                             <div class="row g-2">
                                 <div class="col-md-4">
                                     <label class="form-label">CEP</label>
-                                    <input id="cep" class="form-control" placeholder="00000-000" aria-invalid="false" value="{{ old('cep', $pedido->cep ?? '') }}">
+                                    <input id="cep" class="form-control" placeholder="00000-000" maxlength="9" inputmode="numeric" aria-invalid="false" value="{{ old('cep', $pedido->cep ?? '') }}">
                                     <div id="cepError" class="invalid-feedback d-block" style="display: none !important;">&nbsp;</div>
                                     <div class="form-text">Digite o CEP e clique em Buscar.</div>
                                 </div>
@@ -473,6 +473,10 @@ document.addEventListener('DOMContentLoaded', () => {
     syncMiniCart();
 
     const cepInput = document.getElementById('cep');
+    if (cepInput) {
+        cepInput.value = applyCepMask(cepInput.value);
+    }
+
     const btnBuscarCep = document.getElementById('btnBuscarCep');
 
     const getPedidoAddressPayload = () => ({
@@ -498,6 +502,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await resp.json().catch(() => ({}));
             if (!resp.ok) {
+                const message = data?.errors?.cep?.[0] || data?.message;
+                if (resp.status === 422 && message) {
+                    setCepError(message);
+                }
                 console.error('Erro ao salvar endereço do pedido', data);
                 return false;
             }

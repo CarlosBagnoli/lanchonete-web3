@@ -16,21 +16,20 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'min:6', 'confirmed'],
+        $dados = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'name' => $dados['name'],
+            'email' => $dados['email'],
+            'password' => Hash::make($dados['password']),
             'role' => 'atendente',
         ]);
 
         Auth::login($user);
-        $request->session()->regenerate();
 
         return redirect()->route('dashboard')->with('success', 'Conta criada com sucesso.');
     }
@@ -42,19 +41,20 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+        $credenciais = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
         ]);
 
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended(route('dashboard'));
+        if (! Auth::attempt($credenciais)) {
+            return back()->withErrors([
+                'email' => 'E-mail ou senha inválidos.',
+            ])->onlyInput('email');
         }
 
-        return back()
-            ->withErrors(['email' => 'Credenciais inválidas.'])
-            ->onlyInput('email');
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('dashboard'));
     }
 
     public function logout(Request $request)
@@ -73,17 +73,13 @@ class AuthController extends Controller
 
     public function updateAccount(Request $request)
     {
-        $user = $request->user();
-
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+        $dados = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $request->user()->id,
         ]);
 
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-        $user->save();
+        $request->user()->update($dados);
 
-        return redirect()->route('minha-conta')->with('success', 'Dados atualizados com sucesso.');
+        return back()->with('success', 'Dados atualizados com sucesso.');
     }
 }

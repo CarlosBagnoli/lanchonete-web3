@@ -6,23 +6,25 @@ use App\Http\Controllers\SobreController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ContatoController;
 use App\Http\Controllers\ProdutoController;
-use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AuthController as WebAuthController;
 use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\ItemPedidoController;
 use App\Http\Controllers\CepController;
+use App\Http\Controllers\Api\AuthController as ApiAuthController;
+use App\Http\Controllers\Api\ProdutoApiController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sobre', [SobreController::class, 'index'])->name('sobre');
 Route::get('/relatorios/categorias.csv', [CategoriaController::class, 'exportCsv'])->name('relatorios.categorias.csv');
 Route::get('/contato', [ContatoController::class, 'create'])->name('contato.create');
 // Rotas de produtos registradas abaixo dentro do grupo `auth` (evita exposição pública)
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register.form')->middleware('guest');
-Route::post('/register', [AuthController::class, 'register'])->name('register')->middleware('guest');
+Route::get('/register', [WebAuthController::class, 'showRegisterForm'])->name('register.form')->middleware('guest');
+Route::post('/register', [WebAuthController::class, 'register'])->name('register')->middleware('guest');
 
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login.form')->middleware('guest');
-Route::post('/login', [AuthController::class, 'login'])->name('login')->middleware('guest');
+Route::get('/login', [WebAuthController::class, 'showLoginForm'])->name('login.form')->middleware('guest');
+Route::post('/login', [WebAuthController::class, 'login'])->name('login')->middleware('guest');
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+Route::post('/logout', [WebAuthController::class, 'logout'])->name('logout')->middleware('auth');
 
 Route::middleware(['auth'])->group(function () {
 
@@ -44,8 +46,8 @@ Route::delete('pedidos/{pedido}/itens-json/{itemPedido}', [ItemPedidoController:
     Route::post('pedidos/{pedido}/status', [PedidoController::class, 'updateStatus'])->name('pedidos.status.update');
     Route::post('pedidos/{pedido}/endereco', [PedidoController::class, 'updateAddress'])->name('pedidos.endereco.update');
 
-    Route::get('/minha-conta', [AuthController::class, 'showAccount'])->name('minha-conta');
-    Route::post('/minha-conta', [AuthController::class, 'updateAccount'])->name('minha-conta.update');
+    Route::get('/minha-conta', [WebAuthController::class, 'showAccount'])->name('minha-conta');
+    Route::post('/minha-conta', [WebAuthController::class, 'updateAccount'])->name('minha-conta.update');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -57,10 +59,20 @@ Route::middleware(['auth','role:admin'])->prefix('admin')->group(function () {
     Route::post('usuarios/{user}/role', [\App\Http\Controllers\UserController::class, 'updateRole'])->name('admin.usuarios.updateRole');
 });
 
-Route::middleware(['auth','role:admin'])->prefix('admin/gerente')->group(function () {
+Route::middleware(['auth','role:admin,gerente'])->prefix('admin/gerente')->group(function () {
     Route::post('cep/cache/clear', [CepController::class, 'clearCache'])->name('admin.gerente.cep.cache.clear');
 });
 Route::middleware(['auth'])->group(function () {
     Route::resource('categorias', CategoriaController::class)
         ->middleware('role:admin');
+});
+
+
+Route::prefix('api')->group(function () {
+    Route::post('/login', [ApiAuthController::class, 'login']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [ApiAuthController::class, 'logout']);
+        Route::apiResource('produtos', ProdutoApiController::class);
+    });
 });
