@@ -12,6 +12,7 @@ use App\Http\Controllers\ItemPedidoController;
 use App\Http\Controllers\CepController;
 use App\Http\Controllers\Api\AuthController as ApiAuthController;
 use App\Http\Controllers\Api\ProdutoApiController;
+use App\Http\Controllers\Api\PedidoApiController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/sobre', [SobreController::class, 'index'])->name('sobre');
@@ -73,6 +74,16 @@ Route::prefix('api')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/logout', [ApiAuthController::class, 'logout']);
-        Route::apiResource('produtos', ProdutoApiController::class);
+        Route::apiResource('pedidos', PedidoApiController::class)->only(['index', 'show']);
+
+        Route::get('produtos', [ProdutoApiController::class, 'index']);
+        Route::get('produtos/{produto}', [ProdutoApiController::class, 'show']);
+
+        Route::middleware('role:gerente')->group(function () {
+            Route::post('produtos', [ProdutoApiController::class, 'store']);
+            Route::put('produtos/{produto}', [ProdutoApiController::class, 'update']);
+            Route::patch('produtos/{produto}', [ProdutoApiController::class, 'update']);
+            Route::delete('produtos/{produto}', [ProdutoApiController::class, 'destroy']);
+        });
     });
 });

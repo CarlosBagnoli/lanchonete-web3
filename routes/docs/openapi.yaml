@@ -1,0 +1,234 @@
+openapi: 3.0.3
+info:
+  title: Lanchonete PW3 API
+  version: 1.1.0
+servers:
+  - url: http://127.0.0.1:8000
+paths:
+  /api/login:
+    post:
+      tags: [Autenticação]
+      summary: Gera token de acesso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+                device_name: { type: string, default: postman }
+      responses:
+        '200':
+          description: Token gerado
+  /api/produtos:
+    get:
+      tags: [Produtos]
+      summary: Lista produtos paginados
+      parameters:
+        - { in: query, name: q, schema: { type: string, maxLength: 80 } }
+        - { in: query, name: categoria_id, schema: { type: integer } }
+        - { in: query, name: preco_min, schema: { type: number, minimum: 0 } }
+        - { in: query, name: preco_max, schema: { type: number, minimum: 0 } }
+        - { in: query, name: ativo, schema: { type: boolean } }
+        - { in: query, name: sort, schema: { type: string, enum: [nome, preco, created_at], default: nome } }
+        - { in: query, name: dir, schema: { type: string, enum: [asc, desc], default: asc } }
+        - { in: query, name: page, schema: { type: integer, minimum: 1, default: 1 } }
+      responses:
+        '200':
+          description: Lista paginada de produtos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProdutoPagination'
+    post:
+      tags: [Produtos]
+      summary: Cria produto
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProdutoCreate'
+      responses:
+        '201':
+          description: Produto criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProdutoEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /api/produtos/{produto}:
+    parameters:
+      - in: path
+        name: produto
+        required: true
+        schema: { type: integer }
+    get:
+      tags: [Produtos]
+      summary: Consulta um produto
+      responses:
+        '200':
+          description: Produto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProdutoResource'
+    put:
+      tags: [Produtos]
+      summary: Atualiza um produto
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProdutoUpdate'
+      responses:
+        '200':
+          description: Produto atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProdutoEnvelope'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+    patch:
+      tags: [Produtos]
+      summary: Atualiza parcialmente um produto
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProdutoUpdate'
+      responses:
+        '200':
+          description: Produto atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProdutoEnvelope'
+    delete:
+      tags: [Produtos]
+      summary: Exclui um produto
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Produto excluído
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [message, data]
+                properties:
+                  message: { type: string }
+                  data: { nullable: true }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    ValidationError:
+      description: Dados inválidos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+  schemas:
+    Produto:
+      type: object
+      properties:
+        id: { type: integer }
+        nome: { type: string }
+        descricao: { type: string, nullable: true }
+        preco: { type: number, format: float }
+        estoque: { type: integer }
+        ativo: { type: boolean }
+        imagem: { type: string, nullable: true }
+        categoria:
+          type: object
+          properties:
+            id: { type: integer }
+            nome: { type: string }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    ProdutoResource:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/Produto'
+    ProdutoCreate:
+      type: object
+      required: [nome, preco, categoria_id]
+      properties:
+        nome: { type: string, maxLength: 120 }
+        descricao: { type: string, maxLength: 500, nullable: true }
+        preco: { type: number, minimum: 0 }
+        categoria_id: { type: integer }
+        estoque: { type: integer, minimum: 0 }
+        ativo: { type: boolean }
+    ProdutoUpdate:
+      type: object
+      properties:
+        nome: { type: string, maxLength: 120 }
+        descricao: { type: string, maxLength: 500, nullable: true }
+        preco: { type: number, minimum: 0 }
+        categoria_id: { type: integer }
+        estoque: { type: integer, minimum: 0 }
+        ativo: { type: boolean }
+    ProdutoEnvelope:
+      type: object
+      required: [message, data]
+      properties:
+        message: { type: string }
+        data:
+          $ref: '#/components/schemas/Produto'
+    PaginationLinks:
+      type: object
+      properties:
+        first: { type: string, nullable: true }
+        last: { type: string, nullable: true }
+        prev: { type: string, nullable: true }
+        next: { type: string, nullable: true }
+    PaginationMeta:
+      type: object
+      properties:
+        current_page: { type: integer }
+        last_page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+        from: { type: integer, nullable: true }
+        to: { type: integer, nullable: true }
+    ProdutoPagination:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Produto'
+        links:
+          $ref: '#/components/schemas/PaginationLinks'
+        meta:
+          $ref: '#/components/schemas/PaginationMeta'
+    ValidationError:
+      type: object
+      required: [message, data, errors]
+      properties:
+        message: { type: string }
+        data: { nullable: true }
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }

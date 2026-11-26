@@ -10,3 +10,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('produtos', ProdutoApiController::class);
 });
+Route::middleware(['auth:sanctum', 'throttle:60,1'])->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::apiResource('produtos', ProdutoApiController::class);
+});

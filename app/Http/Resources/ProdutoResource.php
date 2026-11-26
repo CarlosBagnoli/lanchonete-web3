@@ -17,7 +17,11 @@ class ProdutoResource extends JsonResource
     return [
         'id' => $this->id,
         'nome' => $this->nome,
+        'descricao' => $this->descricao,
         'preco' => (float) $this->preco,
+        'estoque' => (int) $this->estoque,
+        'ativo' => (bool) $this->ativo,
+        'imagem' => $this->imagem,
         'categoria' => $this->whenLoaded('categoria', function () {
             return [
                 'id' => $this->categoria->id,

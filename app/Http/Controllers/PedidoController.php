@@ -108,6 +108,15 @@ class PedidoController extends Controller
         $proximoStatus = $pedido->nextStatus();
 
         if ($dados['status'] !== $proximoStatus) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'message' => 'Os dados enviados são inválidos.',
+                    'errors' => [
+                        'status' => ['Status inválido para este pedido. A sequência permitida é: ' . implode(' → ', Pedido::STATUSES)],
+                    ],
+                ], 422);
+            }
+
             abort(422, 'Status inválido para este pedido. A sequência permitida é: ' . implode(' → ', Pedido::STATUSES));
         }
 

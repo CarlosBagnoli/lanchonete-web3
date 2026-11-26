@@ -1,0 +1,94 @@
+{
+  "info": {
+    "name": "Lanchonete PW3 API",
+    "description": "Coleção dos principais endpoints da API da lanchonete.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8000" },
+    { "key": "token", "value": "" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "auth": { "type": "noauth" },
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/api/login", "host": ["{{baseUrl}}"], "path": ["api", "login"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"gerente@exemplo.com\",\n  \"password\": \"senha\",\n  \"device_name\": \"postman\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Produtos",
+      "item": [
+        {
+          "name": "Listar produtos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/produtos?q=&categoria_id=&preco_min=&preco_max=&ativo=&sort=nome&dir=asc&page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "produtos"],
+              "query": [
+                { "key": "q", "value": "" },
+                { "key": "categoria_id", "value": "" },
+                { "key": "preco_min", "value": "" },
+                { "key": "preco_max", "value": "" },
+                { "key": "ativo", "value": "" },
+                { "key": "sort", "value": "nome" },
+                { "key": "dir", "value": "asc" },
+                { "key": "page", "value": "1" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Consultar produto",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/produtos/1", "host": ["{{baseUrl}}"], "path": ["api", "produtos", "1"] }
+          }
+        },
+        {
+          "name": "Criar produto",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/produtos", "host": ["{{baseUrl}}"], "path": ["api", "produtos"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Novo produto\",\n  \"descricao\": \"Descrição opcional\",\n  \"preco\": 25.50,\n  \"categoria_id\": 1,\n  \"estoque\": 10,\n  \"ativo\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Atualizar produto",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/api/produtos/1", "host": ["{{baseUrl}}"], "path": ["api", "produtos", "1"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preco\": 30.00,\n  \"ativo\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Excluir produto",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/produtos/1", "host": ["{{baseUrl}}"], "path": ["api", "produtos", "1"] }
+          }
+        }
+      ]
+    }
+  ]
+}
